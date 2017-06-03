@@ -1,3 +1,637 @@
-/* Upload Plz*/
-sibal
-sksms duwlsrnek
+#include <stdio.h>
+#include <termio.h>
+#include <stdlib.h>
+#include <time.h>
+
+char name[10];
+char p_map[6][31][31] = {0}; // map파일 저장
+char p_Ospot[6][31][31] = {0};
+char p_spot = '@';
+char umap[5][6][31][31] = {0};
+char first_map[6][31][31] = {0};
+int p_x[6] = {0}; // player x좌표
+int p_y[6] = {0}; // player y좌표
+int O_yx[6][31][31][1] = {0}; // O의y, x 좌표, 총 5단계, 최대 20개까지 존재
+int O_num[6] = {0}; // 각 스테이지의 O 개수
+int dollar_num[6] = {0};
+int stage = 1; // 현재 스테이지 단계
+int i = 0; // 세로
+int j = 0; // 가로
+int count_undo = 0; // undo는 최대 5번
+int num_undo = 0; // undo하고 또 undo하기 위함
+double gap_time[6] = {0}; // 시간측정
+time_t startTime = 0;
+time_t endTime = 0;
+FILE * map; // 맵 읽기, map.txt
+FILE * load; // 파일 로드, sokoban.txt
+FILE * rank;
+
+// 함수 원형
+int getch(void); // OK
+void scan_undo(void); // OK
+void print_undo(void); // OK, 너무 길어서 나누어 줄 필요가 있을 듯
+void scan_map(void); // OK, 맵 처음부터 끝까지 한번에 전부 저장
+void print_map(void); // OK
+void move(void); // OK
+void f_name(void); // OK 10글자? cygwin 한글 3byte
+void dhelp(void); // OK
+void new(void); // OK
+void replay(void); 
+void fexit(void); // OK
+void stage_check(void);
+void save(void);
+void read_top(void); // map [stage] \n name %.1ftime.sec
+void write_top(void); 
+
+// undo 전용 배열 저장
+
+void read_top(void){
+	rank=fopen("ranking.txt","wt");
+		fprintf(rank, "map%d\n%s %.1fsec",stage, name, gap_time[stage]);
+}
+
+void write_top(void){ // 스테이지 끝에다가 붙여 쓰는 건데 명세서 양식처럼 어떻게 사이에 쓰는가?
+	char sc_t;
+	system("clear");
+	while(fscanf(rank, "%c", &sc_t) != EOF)
+		printf("%c", sc_t);
+}
+
+void stage_check(void){
+	int check = 0;
+	i=0;
+	j=0;
+	while(1){
+		if(p_map[stage][i][j] == 'm'){
+			i=0;
+			j=0;
+			break;
+		}
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		if(O_yx[stage][i][j][0] == 'O' && p_map[stage][i][j] == '$'){
+			check++;
+		}
+
+		if(check == O_num[stage]){
+			endTime = clock(); // 스테이지 클리어 시 측정 종료
+			gap_time[stage] = (float)(endTime - startTime);
+			read_top();
+			stage++;
+			i=0;
+			j=0;
+			startTime = clock(); // 다음 스테이지 측정 시작
+			break;
+		}
+		j++;
+	}
+}
+	void scan_undo(void){
+
+		i = 0;
+		j = 0;
+		int check_stage = stage - 1;
+
+		while(1){
+
+			umap[num_undo][stage][i][j] = p_map[stage][i][j];
+
+			if(umap[num_undo][stage][i][j] == 'm'){
+				check_stage++;
+			}
+
+			if(umap[num_undo][stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+
+			if(check_stage == stage)
+				break;
+			j++;
+		}
+	}
+
+	// O의 좌표값 == $의 좌표값을 조건으로 수정
+
+	void print_undo(void){
+
+		int check_stage = stage - 1;
+		i = 0;
+		j = 0;
+		system("clear");
+
+		printf("Hello %s", &name);
+		while(1){
+
+			if(umap[num_undo][stage][i][j] != 'm' && umap[num_undo][stage][i][j] != 'a' && umap[num_undo][stage][i][j] != 'p')
+				printf("%c", umap[num_undo][stage][i][j]);
+
+			if(umap[num_undo][stage][i][j] == 'm')
+				check_stage++;
+
+			if(umap[num_undo][stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+
+			if(check_stage == stage)
+				break;
+			j++;
+		}
+		printf("(Command)");
+
+		i = 0;
+		j = 0;
+		check_stage = stage - 1;
+
+		while(1){
+
+			p_map[stage][i][j] = umap[num_undo][stage][i][j];
+
+			if(p_map[stage][i][j] == 'm'){
+				check_stage++;
+			}
+
+			if(p_map[stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+
+			if(check_stage == stage)
+				break;
+			j++;
+		}
+
+		i = 0;
+		j = 0;
+		check_stage = stage - 1;
+
+		while(1){
+
+			if(p_map[stage][i][j] == '@'){
+				p_y[stage] = i;
+				p_x[stage] = j;
+			}
+
+			if(p_map[stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+
+			if(p_map[stage][i][j] == 'm'){
+				check_stage++;
+			}
+
+			if(check_stage == stage)
+				break;
+			j++;
+		}
+	}
+	// 맵 저장
+
+	void scan_map(void){
+
+		i = 0;
+		j = 0;
+		int scan_stage = 0;
+
+		while(1){
+			fscanf(map, "%c", &p_map[scan_stage][i][j]);
+
+			if(p_map[scan_stage][i][j] == 'm'){
+				if(dollar_num[scan_stage] != O_num[scan_stage]){
+					printf("맵 오류 발생.\n 프로그램을 종료합니다.");
+					exit(0);
+				}
+				scan_stage++;
+			}
+
+			if(p_map[scan_stage][i][j] == '\n'){
+				i++;
+				j = 0;
+				continue;
+			}
+
+			if(p_map[scan_stage][i][j] == '@'){
+				p_y[scan_stage] = i;
+				p_x[scan_stage] = j;
+			}
+
+			if(p_map[scan_stage][i][j]=='O'){
+				p_Ospot[scan_stage][i][j]='O';
+				O_yx[scan_stage][i][j][0] = 'O';
+				O_num[scan_stage]++;
+			}
+
+			if(p_map[scan_stage][i][j]=='$'){
+				dollar_num[scan_stage]++; 
+			}
+
+			if(p_map[scan_stage][i][j]=='e')
+				break;
+			j++;
+		}
+
+		i=0;
+		j=0;
+		scan_stage=0;
+		// New를 위한 1단계 맵 저장.
+		while(1){
+			first_map[scan_stage][i][j] = p_map[scan_stage][i][j];
+			if(first_map[scan_stage][i][j] == 'm')
+				scan_stage++;
+
+			if(first_map[scan_stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+
+			if(scan_stage == 2)
+				break;
+			j++;
+		}	
+	}
+
+	// map 출력
+	
+	void print_map(void)
+	{
+		
+		i = 0;
+		j = 0;
+		int k = 0;
+		printf("Hello %s", name);
+		while (1){
+			if(p_map[stage][i][j] == 'm'){
+				if(p_map[stage][i-1][k] == '\n')
+					break;
+			}
+		
+			if(p_map[stage][i][j] != 'm' && p_map[stage][i][j] != 'a' && p_map[stage][i][j] != 'p')
+				printf("%c", p_map[stage][i][j]);
+
+			if(p_map[stage][i][j] == '\n'){
+				i++;
+				k = j;
+				j=0;
+				continue;
+			}
+
+			j++;
+		}
+		printf("(Command)");
+	}
+
+	// 출력 안하고 키 받기
+	int getch(void){
+		int ch;
+
+		struct termios buf;
+		struct termios save;
+
+		tcgetattr(0, &save);
+		buf = save;
+
+		buf.c_lflag&=~(ICANON|ECHO);
+		buf.c_cc[VMIN] = 1;  
+		buf.c_cc[VTIME] = 0;
+
+		tcsetattr(0, TCSAFLUSH, &buf);
+		ch = getchar();
+		tcsetattr(0, TCSAFLUSH, &save);
+
+		return ch; 
+	}	
+
+	// 커서 이동 및 옵션 입력	
+	void f_move(void){
+		startTime = clock(); // 시간 측정 시작
+		while(1){
+			char move;
+			move = getch();
+			if(move == 'h' || move == 'H')
+			{
+				if(p_map[stage][p_y[stage]][p_x[stage]-1] =='$' && p_map[stage][p_y[stage]][p_x[stage]-2] == p_Ospot[stage][p_y[stage]][p_x[stage]-2])
+				{
+					scan_undo();
+					p_map[stage][p_y[stage]][p_x[stage]-2] = '$';
+					p_map[stage][p_y[stage]][p_x[stage]-1] = '@';
+					p_map[stage][p_y[stage]][p_x[stage]] = ' ';
+					p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+					p_x[stage]--;
+					system("clear");
+					print_map();
+					stage_check();
+					continue;
+				}
+				if(p_map[stage][p_y[stage]][p_x[stage]-1] == '#')
+					continue;
+				if(p_map[stage][p_y[stage]][p_x[stage]-1] == '$' && p_map[stage][p_y[stage]][p_x[stage]-2] == '$')
+					continue;
+				if(p_map[stage][p_y[stage]][p_x[stage]-1] == '$' && p_map[stage][p_y[stage]][p_x[stage]-2] == '#')
+					continue;
+
+				scan_undo();
+				p_map[stage][p_y[stage]][p_x[stage]-1] = '@';
+				p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+				p_x[stage]--;
+				system("clear");
+				print_map();
+				stage_check();
+			}
+
+
+
+			if(move == 'k' || move == 'K')
+			{
+				{
+					if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == p_Ospot[stage][p_y[stage]-2][p_x[stage]])
+					{
+						scan_undo();
+						p_map[stage][p_y[stage]-2][p_x[stage]] = '$';
+						p_map[stage][p_y[stage]-1][p_x[stage]] = '@';
+						p_map[stage][p_y[stage]][p_x[stage]] = ' ';		
+						p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+						p_y[stage]--;
+						system("clear");
+						print_map();
+						stage_check();
+						continue;
+					} 
+					if(p_map[stage][p_y[stage]-1][p_x[stage]] == '#')
+						continue;
+					if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == '$')
+						continue;
+					if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == '#')
+						continue;
+				}
+				scan_undo();
+				p_map[stage][p_y[stage]-1][p_x[stage]] = '@';
+				p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+				p_y[stage]--;
+				system("clear");
+				print_map();
+				stage_check();
+			}
+			if(move == 'j' || move == 'J')
+			{
+				{
+					if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == p_Ospot[stage][p_y[stage]+2][p_x[stage]])
+					{
+						scan_undo();
+						p_map[stage][p_y[stage]+2][p_x[stage]] = '$';
+						p_map[stage][p_y[stage]+1][p_x[stage]] = '@';
+						p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+						p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+						p_y[stage]++;
+						system("clear");
+						print_map();
+						stage_check();
+						continue;
+					}
+					if(p_map[stage][p_y[stage]+1][p_x[stage]] == '#')	
+						continue;
+					if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == '$')
+						continue;
+					if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == '#')
+						continue;
+				}
+				scan_undo();
+				p_map[stage][p_y[stage]+1][p_x[stage]] = '@';
+				p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+				p_y[stage]++;
+				system("clear");
+				print_map();
+				stage_check();
+
+			}
+			if(move == 'l' || move == 'L')
+			{
+				{
+					if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == p_Ospot[stage][p_y[stage]][p_x[stage]+2])
+					{
+						scan_undo();
+						p_map[stage][p_y[stage]][p_x[stage]+2] = '$';
+						p_map[stage][p_y[stage]][p_x[stage]+1] = '@';
+						p_map[stage][p_y[stage]][p_x[stage]] = ' ';
+						p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+						p_x[stage]++;
+						system("clear");
+						print_map();
+						stage_check();
+
+						continue;
+					}
+					if(p_map[stage][p_y[stage]][p_x[stage]+1] =='#')
+						continue;
+					if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == '$')
+						continue;
+					if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == '#')
+						continue;
+				}
+				scan_undo();
+				p_map[stage][p_y[stage]][p_x[stage]+1] = '@';
+				p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+				p_x[stage]++;
+				system("clear");
+				print_map();
+				stage_check();
+
+			}
+
+			if(move == 'u' || move == 'U'){
+				printf("u");
+				getchar();
+				print_undo();
+			}
+
+			if(move == 'd' || move == 'D'){
+				printf("d");
+				getchar();
+				dhelp();
+			}
+			if(move == 's' || move == 'S'){
+				printf("s");
+				getchar();
+				endTime = clock();
+				gap_time[stage] = (float)(endTime - startTime);
+				save();
+			}
+			if(move == 'n' || move == 'N'){
+				printf("n");
+				getchar();
+				new();
+			}
+			
+			if(move == 'e' || move == 'E'){
+				printf("e");
+				getchar();
+				fexit();
+			}
+
+			if(move == 't' || move == 'T'){
+				printf("t");
+				getchar();
+				write_top();
+			}
+		}
+	}
+	// 시작, 이름 입력
+	void f_name(){
+		system("clear");
+		printf("Start....\n");
+		printf("input name : ");
+		scanf("%s", &name);
+	}
+
+	//  D 입력 시 도움말 출력
+	void dhelp(void){
+
+		system("clear");
+		printf("h(왼쪽), j(아래), k(위), l(오른쪽)\n");
+		printf("u(undo)\n");
+		printf("r(replay)\n");
+		printf("n(new)\n");
+		printf("e(exit)\n");
+		printf("s(save)\n");
+		printf("f(file load)\n");
+		printf("d(display help)\n");
+		printf("t(top)\n");
+		printf("(Command) d");
+		getchar();
+	}
+
+	void new(void){
+
+		int check_stage = 0;
+		i=0;
+		j=0;
+		system("clear");
+		printf("Hello %s", name);
+		while(1){
+			p_map[check_stage][i][j] = first_map[check_stage][i][j];
+
+			if(p_map[check_stage][i][j] == 'm')
+				check_stage++;
+
+			if(p_map[check_stage][i][j] == '@'){
+				p_y[check_stage] = i;
+				p_x[check_stage] = j;
+			}
+			if(p_map[check_stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+			if(check_stage == 2)
+				break;
+
+			j++;
+		}
+
+		i=0;
+		j=0;
+		check_stage = 0;
+
+		while(1){
+			if(p_map[check_stage][i][j] != 'm' && p_map[check_stage][i][j] != 'a' && p_map[check_stage][i][j] != 'p')
+				printf("%c", p_map[stage][i][j]);
+
+			if(p_map[check_stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+			if(p_map[check_stage][i][j] == 'm')
+				check_stage++;
+			if(check_stage == 2)
+				break;
+			j++;
+		}
+	}
+
+	void replay(void){ 
+		int rstage;
+		i = 0;
+		j = 0;
+		for(rstage=1;rstage<=5;rstage++){
+			if(stage==rstage){
+				system("clear");
+				scan_map(); // 이러면 다음 맵을 불러오므로 수정요함
+				break;
+			}
+		}
+	}
+
+	void fexit(void){
+		// save();
+		system("clear");
+		printf("S E E  Y O U %s . . . .\n", name);
+		printf("(Command) e");
+		exit(0);
+	}
+
+	void save(void){ // 시간 해결 필요
+
+		i=0;
+		j=0;
+		int check_stage = stage - 1;
+		FILE * sokoban;
+		sokoban = fopen("sokoban.txt", "wt");
+		fprintf(sokoban, "m");
+
+		while(1){
+			if(p_map[stage][i][j] == 'm')
+				break;
+
+			fprintf(sokoban, "%c", p_map[stage][i][j]);
+
+			if(p_map[stage][i][j] == '\n'){
+				i++;
+				j=0;
+				continue;
+			}
+			j++;
+		}
+		system("clear");
+		print_map();
+		fprintf(sokoban, "%s\n", name);
+		fprintf(sokoban, "%f\n", gap_time[stage]);
+		fclose(sokoban);
+	}
+
+
+
+	int main(void){
+		map = fopen("map.txt", "rt");
+		load = fopen("sokoban.txt", "rt");
+		f_name();
+		system("clear");
+		int i,j,k;
+		for (k=0;k<6;k++)
+		{
+			for(i=0;i<30;i++)
+			{
+				for(j=0;j<30;j++)
+				{
+					p_Ospot[k][i][j]=' ';
+				}
+			}
+		}
+		scan_map();
+		print_map();
+		f_move();
+		fclose(map);
+		fclose(load);
+		fclose(rank);
+		return 0;
+	}
