@@ -593,3 +593,243 @@ void dhelp(void){
 	system("clear");
 	print_map();
 }
+
+// 이름 받기, 이서영
+void f_name(){
+	int i = 0;
+	char c;
+	system("clear");
+	printf("Start....\n");
+	printf("input name : ");
+
+	while(1){
+		c = getchar();
+		
+		if((c=='\n')||(c==EOF)){
+			name[i++] = '\0';
+			break;
+		}
+
+		if((c==' ') || (i==10)){
+			while((c=getchar())!='\n') ;
+			printf("\n10자 이하의 영문으로 입력해주세요.\ninput name : ");
+			i = 0;
+			continue;
+		}
+
+		if((c>='a' && c<='z') || (c>='A' && c<='Z')){
+		}
+
+		else{
+			while((c=getchar())!='\n') ;
+			i=0;
+			printf("\n10자 이하의 영문으로 입력해주세요.\ninput name : ");
+			continue;
+		}
+		name[i++] = c;
+	}
+}
+
+// 스테이지 클리어 체크, 이서영
+void stage_check(void){
+
+	int check = 0;
+	i=0;
+	j=0;
+	while(1){
+		if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] =='e'){
+			i=0;
+			j=0;
+			break;
+		}
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		if(p_Ospot[stage][i][j]== 'O' && p_map[stage][i][j] == '$')
+			check++;
+
+		if(check == O_num[stage]){
+			endTime = clock(); // 스테이지 클리어 시 측정 종료
+			gap_time[stage] = (float)((endTime - startTime + plustime)/(CLOCKS_PER_SEC));
+			saving_top();
+			sort_top();
+			write_top();
+			stage++;
+
+			if(stage == 6){
+				printf("\n");
+				system("clear");
+				printf("Congraturation ! You clear all stage.");
+				exit(0);
+			}
+
+			for(int c=0;c<6;c++){
+				i=0;
+				j=0;
+				while(1){
+
+					umap[c][stage][i][j] = p_map[stage][i][j];
+
+					if(p_map[stage][i][j] == '\n'){
+						i++;
+						j=0;
+						continue;
+					}
+					if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] == 'e')
+						break;
+					j++;
+				}
+			}
+			i=0;
+			j=0;
+
+			count_undo = 0;
+			printf("\n");
+			system("clear");
+			print_map();
+			startTime = clock(); // 다음 스테이지 측정 시작
+			break;
+		}
+		j++;
+	}
+}
+
+
+// 현재 상태 저장, 이서영
+void save(void){ 
+
+	int nu = 0;
+	i=0;
+	j=0;
+	FILE * sokoban;
+	endTime = clock();
+	plustime = endTime - startTime;
+	sokoban = fopen("sokoban.txt", "wt");
+	fprintf(sokoban, "%s %d %d %d", name, plustime, stage, count_undo);
+	fprintf(sokoban, "\n");
+
+	while(1){
+
+		fprintf(sokoban, "%c", p_map[stage][i][j]);
+
+		if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] == 'e')
+			break;
+
+		else if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+		j++;
+	}
+
+	i=0;
+	j=0;
+
+	while(nu <= 5){
+
+		fprintf(sokoban, "%c", umap[nu][stage][i][j]);
+
+		if(umap[nu][stage][i][j] == 'm' || umap[nu][stage][i][j] == 'e'){
+			nu++;
+			i=0;
+			j=0;
+			continue;
+		}
+		else if(umap[nu][stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+		j++;
+	}
+
+	system("clear");
+	print_map();
+	fclose(sokoban);
+}
+
+
+// 불러오기, 이서영
+void f_load(void){
+
+	int nu = 0;
+
+	load = fopen("sokoban.txt", "rt");
+	fscanf(load,"%s %d %d %d\n", name, &plustime, &stage, &count_undo);
+	i=0;
+	j=0;
+	system("clear");
+
+	while(1){
+
+		fscanf(load, "%c", &p_map[stage][i][j]);
+
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		if(p_map[stage][i][j]== 'm' || p_map[stage][i][j] == 'e')	
+			break;
+
+		if(p_map[stage][i][j]== '@'){
+			p_x[stage] = j;
+			p_y[stage] = i;
+		}
+
+		if(p_map[stage][i][j]== 'O'){
+			p_Ospot[stage][i][j]='O';
+		}
+		j++;
+	}
+	i=0;
+	j=0;
+
+	while(nu<6){
+
+		fscanf(load, "%c", &umap[nu][stage][i][j]);
+
+		if(umap[nu][stage][i][j] == 'm' || umap[nu][stage][i][j] == 'e'){
+			nu++;
+			i=0;
+			j=0;
+			continue;
+		}
+
+		if(umap[nu][stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		j++;
+	}
+
+	fclose(load);
+
+	printf("   Hello %s\n", name);
+
+	while(1){
+
+		if(p_map[stage][i][j] != 'm' && p_map[stage][i][j] != 'a' && p_map[stage][i][j] != 'p' && p_map[stage][i][j] != 'e' && p_map[stage][i][j] != 'n' && p_map[stage][i][j] != 'd')
+			printf("%c", p_map[stage][i][j]);
+
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] == 'e')
+			break;
+
+		j++;
+	}
+	startTime = clock();
+	printf("(Command)");
+}
