@@ -30,6 +30,25 @@ FILE * map; // 맵 읽기, map.txt
 FILE * load; // 파일 로드, sokoban.txt
 FILE * rank; // 랭킹 저장, ranking.txt
 
+// 함수 원형
+int getch(void); //  OK
+void scan_undo(void); // 움직이기 이전 저장 OK
+void print_undo(void); // option undo OK
+void scan_map(void); // map파일을 모두 읽어 stage별로 저장 OK
+void print_map(void); // 맵 출력 OK
+void f_move(void); // 움직이기 OK
+void f_name(void); // 이름 받기 OK 
+void dhelp(void); // d입력 시 도움말 출력 OK
+void new(void); // stage 1부터 다시 시작. OK
+void replay(void); // 현재 스테이지 다시 시작. OK
+void fexit(void); // 프로그램 종료 OK
+void stage_check(void); // 클리어 체크 OK
+void save(void);// 저장 기능 OK
+void f_load(void); // 불러오기 OK
+void saving_top(void); // ranking.txt 파일 읽어서 저장 OK
+void sort_top(void); // 기존 랭킹과 비교, 정렬 OK
+void write_top(void); // ranking.txt 파일에 쓰기 OK
+
 //------------------------------------------------------------------------------------------------------------------------------------
 
 // main 함수
@@ -49,6 +68,27 @@ int main(void){
 		scan_undo();
 	f_move();
 	return 0;
+}
+
+// 출력 안하고 키 받기 
+int getch(void){
+	int ch;
+
+	struct termios buf;
+	struct termios save;
+
+	tcgetattr(0, &save);
+	buf = save;
+
+	buf.c_lflag&=~(ICANON|ECHO);
+	buf.c_cc[VMIN] = 1;
+	buf.c_cc[VTIME] = 0;
+
+	tcsetattr(0, TCSAFLUSH, &buf);
+	ch = getchar();
+	tcsetattr(0, TCSAFLUSH, &save);
+
+	return ch;
 }
 
 // map 파일을 읽어서 저장, 양성인
