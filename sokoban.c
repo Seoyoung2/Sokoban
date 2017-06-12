@@ -833,3 +833,228 @@ void f_load(void){
 	startTime = clock();
 	printf("(Command)");
 }
+
+
+// ranking.txt 파일의 내용을 저장, 정경륜
+void saving_top(void){ 
+
+	char del[5];
+	int check = 1;
+	int cnt_stage;
+	rank = fopen("ranking.txt","r");
+
+	while(1){
+
+		if(check == 6)
+			break;
+
+		fscanf(rank,"%s", del);
+		fscanf(rank,"%d", &cnt_stage);
+		fscanf(rank,"%d", &top_cnt[cnt_stage]);
+
+		for(int a=1;a<=top_cnt[cnt_stage];a++){
+			fscanf(rank,"%s", top_name[cnt_stage][a]);
+			fscanf(rank,"%f", &top_time[cnt_stage][a]);
+		}	
+		check++;
+	}
+	fclose(rank);	
+}
+
+// 기존 랭킹과 현재 플레이어의 기록을 비교, 정렬. 정경륜
+void sort_top(void){
+
+	char tmp_name[10][11];
+	float tmp_time[10];
+	int cnt_stage = stage;
+	cnt_stage = stage;
+	int x = 1;
+
+	if(top_cnt[cnt_stage] == 0){
+		top_time[cnt_stage][1] = gap_time[stage];
+		strcpy(top_name[cnt_stage][1], name);
+	}
+
+	else if(top_cnt[cnt_stage] == 1){
+
+		while(1){
+			if(top_time[cnt_stage][x] >= gap_time[stage]){
+				tmp_time[0] = top_time[cnt_stage][x];
+				top_time[cnt_stage][x] = gap_time[stage];
+				top_time[cnt_stage][x+1] = tmp_time[0];
+
+				strcpy(tmp_name[0], top_name[cnt_stage][x]);
+				strcpy(top_name[cnt_stage][x], name);
+				strcpy(top_name[cnt_stage][x+1], tmp_name[0]);
+				break;
+			}
+
+			else {
+				top_time[cnt_stage][2] = gap_time[stage];
+				strcpy(top_name[cnt_stage][2], name);
+			}
+			x++;
+
+			if(x == top_cnt[cnt_stage]+1)
+				break;
+		}
+	}
+
+	else if(top_cnt[cnt_stage] == 2){
+		while(1){
+			if(top_time[cnt_stage][x] >= gap_time[stage]){
+				tmp_time[0] = top_time[cnt_stage][x];
+				tmp_time[1] = top_time[cnt_stage][x+1];
+				top_time[cnt_stage][x] = gap_time[stage];
+				top_time[cnt_stage][x+1] = tmp_time[0];
+				top_time[cnt_stage][x+2] = tmp_time[1];
+
+				strcpy(tmp_name[0], top_name[cnt_stage][x]);
+				strcpy(tmp_name[1], top_name[cnt_stage][x+1]);
+				strcpy(top_name[cnt_stage][x], name);
+				strcpy(top_name[cnt_stage][x+1], tmp_name[0]);
+				strcpy(top_name[cnt_stage][x+2], tmp_name[1]);
+				break;
+			}
+
+			else {
+				top_time[cnt_stage][3] = gap_time[stage];
+				strcpy(top_name[cnt_stage][3], name);
+			}
+			x++;
+
+			if(x == top_cnt[cnt_stage]+1)
+				break;
+		}
+	}
+
+
+	else if(top_cnt[cnt_stage] == 3){
+
+		while(1){
+			if(top_time[cnt_stage][x] >= gap_time[stage]){
+				
+				tmp_time[0] = top_time[cnt_stage][x];
+				tmp_time[1] = top_time[cnt_stage][x+1];
+				top_time[cnt_stage][x] = gap_time[stage];
+				top_time[cnt_stage][x+1] = tmp_time[0];
+				top_time[cnt_stage][x+2] = tmp_time[1];
+
+				strcpy(tmp_name[0], top_name[cnt_stage][x]);
+				strcpy(tmp_name[1], top_name[cnt_stage][x+1]);
+				strcpy(top_name[cnt_stage][x], name);
+				strcpy(top_name[cnt_stage][x+1], tmp_name[0]);
+				strcpy(top_name[cnt_stage][x+2], tmp_name[1]);
+				break;
+				
+			}
+
+			else {
+				top_time[cnt_stage][4] = gap_time[stage];
+				strcpy(top_name[cnt_stage][4], name);
+			}
+
+			x++;
+
+			if(x == top_cnt[cnt_stage]+1)
+				break;
+		}
+	}
+
+	else if(top_cnt[cnt_stage] == 4){
+
+		while(1){
+			if(top_time[cnt_stage][x] >= gap_time[stage]){
+				tmp_time[0] = top_time[cnt_stage][x];
+				tmp_time[1] = top_time[cnt_stage][x+1];
+				tmp_time[2] = top_time[cnt_stage][x+2];
+				top_time[cnt_stage][x] = gap_time[stage];
+				top_time[cnt_stage][x+1] = tmp_time[0];
+				top_time[cnt_stage][x+2] = tmp_time[1];
+				top_time[cnt_stage][x+3] = tmp_time[2];
+
+				strcpy(tmp_name[0], top_name[cnt_stage][x]);
+				strcpy(tmp_name[1], top_name[cnt_stage][x+1]);
+				strcpy(tmp_name[2], top_name[cnt_stage][x+2]);
+				strcpy(top_name[cnt_stage][x], name);
+				strcpy(top_name[cnt_stage][x+1], tmp_name[0]);
+				strcpy(top_name[cnt_stage][x+2], tmp_name[1]);
+				strcpy(top_name[cnt_stage][x+3], tmp_name[2]);
+				break;
+				
+			}
+			else {
+				top_time[cnt_stage][5] = gap_time[stage];
+				strcpy(top_name[cnt_stage][5], name);
+			}
+
+			x++;
+
+			if(x == top_cnt[cnt_stage]+1)
+				break;
+		}
+	}
+
+	else if(top_cnt[cnt_stage] == 5){
+
+		while(1){
+			if(top_time[cnt_stage][x] >= gap_time[stage]){
+					tmp_time[0] = top_time[cnt_stage][x];
+					tmp_time[1] = top_time[cnt_stage][x+1];
+					tmp_time[2] = top_time[cnt_stage][x+2];
+					tmp_time[3] = top_time[cnt_stage][x+3];
+					top_time[cnt_stage][x] = gap_time[stage];
+					top_time[cnt_stage][x+1] = tmp_time[0];
+					top_time[cnt_stage][x+2] = tmp_time[1];
+					top_time[cnt_stage][x+3] = tmp_time[2];
+					top_time[cnt_stage][x+4] = tmp_time[3];
+
+					strcpy(tmp_name[0], top_name[cnt_stage][x]);
+					strcpy(tmp_name[1], top_name[cnt_stage][x+1]);
+					strcpy(tmp_name[2], top_name[cnt_stage][x+2]);
+					strcpy(tmp_name[3], top_name[cnt_stage][x+3]);
+					strcpy(top_name[cnt_stage][x], name);
+					strcpy(top_name[cnt_stage][x+1], tmp_name[0]);
+					strcpy(top_name[cnt_stage][x+2], tmp_name[1]);
+					strcpy(top_name[cnt_stage][x+3], tmp_name[2]);
+					strcpy(top_name[cnt_stage][x+4], tmp_name[3]);
+					
+				break;
+			}
+			x++;
+
+			if(x == top_cnt[cnt_stage]+1)
+				break;
+		}
+	}
+}
+
+// ranking.txt 파일에 내용 쓰기, 정경륜
+void write_top(void){
+	int num = 1;
+	int top_stage = 1;
+	rank = fopen("ranking.txt", "w");
+
+	while(1){
+
+		if(top_stage == 6)
+			break;
+
+		if(top_cnt[num] < 5 && top_stage == stage){
+			top_cnt[num]++;
+			fprintf(rank,"map %d %d\n", num, top_cnt[num]);
+		}
+
+		else 
+		{
+			fprintf(rank,"map %d %d\n", num, top_cnt[num]);
+		}
+
+		for(int a=1;a<=top_cnt[num];a++)
+			fprintf(rank,"%s %.1f\n", top_name[top_stage][a], top_time[top_stage][a]);
+
+		num++;
+		top_stage++;
+	}
+	fclose(rank);
+}
