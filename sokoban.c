@@ -32,6 +32,25 @@ FILE * rank; // 랭킹 저장, ranking.txt
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
+// main 함수
+int main(void){
+	f_name();
+	int i,j,k;
+	for (k=0;k<6;k++)
+		for(i=0;i<32;i++)
+			for(j=0;j<32;j++)
+				p_Ospot[k][i][j]=' ';
+
+	scan_map();
+	saving_top();
+	system("clear");
+	print_map();
+	for(int c=0;c<6;c++)
+		scan_undo();
+	f_move();
+	return 0;
+}
+
 // map 파일을 읽어서 저장, 양성인
 void scan_map(void){
 
