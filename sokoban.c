@@ -254,3 +254,314 @@ void replay(void){
 	}
 	printf("(Command)");
 }
+
+// 움직이기, 박영준
+void f_move(void){
+	startTime = clock(); // 시간 측정 시작
+	while(1){
+		char move[3];
+		move[0] = getch();
+
+		if(move[0] == 'h')
+		{
+			if(p_map[stage][p_y[stage]][p_x[stage]-1] =='$' && p_map[stage][p_y[stage]][p_x[stage]-2] == p_Ospot[stage][p_y[stage]][p_x[stage]-2])
+			{
+				scan_undo();
+				p_map[stage][p_y[stage]][p_x[stage]-2] = '$';
+				p_map[stage][p_y[stage]][p_x[stage]-1] = '@';
+				p_map[stage][p_y[stage]][p_x[stage]] = ' ';
+				p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+				p_x[stage]--;
+				system("clear");
+				print_map();
+				stage_check();
+				continue;
+			}
+			if(p_map[stage][p_y[stage]][p_x[stage]-1] == '#')
+				continue;
+			if(p_map[stage][p_y[stage]][p_x[stage]-1] == '$' && p_map[stage][p_y[stage]][p_x[stage]-2] == '$')
+				continue;
+			if(p_map[stage][p_y[stage]][p_x[stage]-1] == '$' && p_map[stage][p_y[stage]][p_x[stage]-2] == '#')
+				continue;
+
+			scan_undo();
+			p_map[stage][p_y[stage]][p_x[stage]-1] = '@';
+			p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+			p_x[stage]--;
+			system("clear");
+			print_map();
+			stage_check();
+			continue;
+		}
+
+
+
+		else if(move[0] == 'k')
+		{
+			{
+				if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == p_Ospot[stage][p_y[stage]-2][p_x[stage]])
+				{
+					scan_undo();
+					p_map[stage][p_y[stage]-2][p_x[stage]] = '$';
+					p_map[stage][p_y[stage]-1][p_x[stage]] = '@';
+					p_map[stage][p_y[stage]][p_x[stage]] = ' ';
+					p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+					p_y[stage]--;
+					system("clear");
+					print_map();
+					stage_check();
+					continue;
+				}
+				else if(p_map[stage][p_y[stage]-1][p_x[stage]] == '#')
+					continue;
+				else if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == '$')
+					continue;
+				else if(p_map[stage][p_y[stage]-1][p_x[stage]] == '$' && p_map[stage][p_y[stage]-2][p_x[stage]] == '#')
+					continue;
+			}
+			scan_undo();
+			p_map[stage][p_y[stage]-1][p_x[stage]] = '@';
+			p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+			p_y[stage]--;
+			system("clear");
+			print_map();
+			stage_check();
+			continue;
+		}
+		else if(move[0] == 'j')
+		{
+			{
+				if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == p_Ospot[stage][p_y[stage]+2][p_x[stage]])
+				{
+					scan_undo();
+					p_map[stage][p_y[stage]+2][p_x[stage]] = '$';
+					p_map[stage][p_y[stage]+1][p_x[stage]] = '@';
+					p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+					p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+					p_y[stage]++;
+					system("clear");
+					print_map();
+					stage_check();
+					continue;
+				}
+				else if(p_map[stage][p_y[stage]+1][p_x[stage]] == '#')
+					continue;
+				else if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == '$')
+					continue;
+				else if(p_map[stage][p_y[stage]+1][p_x[stage]] == '$' && p_map[stage][p_y[stage]+2][p_x[stage]] == '#')
+					continue;
+			}
+			scan_undo();
+			p_map[stage][p_y[stage]+1][p_x[stage]] = '@';
+			p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+			p_y[stage]++;
+			system("clear");
+			print_map();
+			stage_check();
+			continue;
+
+		}
+		else if(move[0] == 'l')
+		{
+			{
+				if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == p_Ospot[stage][p_y[stage]][p_x[stage]+2])
+				{
+					scan_undo();
+					p_map[stage][p_y[stage]][p_x[stage]+2] = '$';
+					p_map[stage][p_y[stage]][p_x[stage]+1] = '@';
+					p_map[stage][p_y[stage]][p_x[stage]] = ' ';
+					p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+					p_x[stage]++;
+					system("clear");
+					print_map();
+					stage_check();
+					continue;
+				}
+				else if(p_map[stage][p_y[stage]][p_x[stage]+1] =='#')
+					continue;
+				else if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == '$')
+					continue;
+				else if(p_map[stage][p_y[stage]][p_x[stage]+1] == '$' && p_map[stage][p_y[stage]][p_x[stage]+2] == '#')
+					continue;
+			}
+			scan_undo();
+			p_map[stage][p_y[stage]][p_x[stage]+1] = '@';
+			p_map[stage][p_y[stage]][p_x[stage]] = p_Ospot[stage][p_y[stage]][p_x[stage]];
+			p_x[stage]++;
+			system("clear");
+			print_map();
+			stage_check();
+			continue;
+		}
+
+		else if (move[0] == 't'){
+			printf("%c", move[0]);
+			move[1] = getch();
+
+			if(move[1] == 10){
+				system("clear");
+				printf("   Hello %s\n\n", name);
+				for(int a=1;a<6;a++){
+					if(top_cnt[a] == 0)
+						continue;
+					printf("map %d\n", a);
+					for(int b=1;b<6;b++){
+						if(top_time[a][b] == 0.0){
+							continue;
+						}
+						printf("%s %.1fsec\n", top_name[a][b], top_time[a][b]);
+					}
+				}	
+				printf("\n(Command) t");
+				getch();
+				system("clear");
+				print_map();
+				continue;
+			}
+
+			else if(move[1] >= '1' && move[1] <= '5'){ 
+				printf("%c", move[1]);
+				move[2] = getch();
+				if(move[2] == 10){
+					system("clear");
+					printf("   Hello %s\n\n", name);
+					printf("map %c\n", move[1]);
+					for(int a=1;a<=top_cnt[move[1]-'0'];a++)
+						printf("%s %.1f\n", top_name[move[1]-'0'][a], top_time[move[1]-'0'][a]);  // 아스키코드 값으로 인식하므로 -'0'
+					printf("\n(Command)%c %c\n",move[0], move[1]);
+					getch();
+					system("clear");
+					print_map();
+				}
+			}
+			continue;
+		}
+
+		else if(move[0] != 'u' && move[0] != 'd' && move[0] != 's' && move[0] != 'n' && move[0] != 'f' && move[0] != 'e' && move[0] != 'r'){
+			system("clear");
+			print_map();
+			continue;
+		}
+
+		printf("%c", move[0]);
+
+		move[1] = getch();
+
+		if(move[0] == 'u' && move[1] == 10){
+			if(count_undo == 5){
+				printf("이미 5회 사용하셨습니다.");
+				continue;
+			}
+			count_undo++;
+			print_undo();
+			continue;
+		}
+
+		else if(move[0] == 'd' && move[1] == 10){
+			dhelp();
+			continue;
+		}
+
+		else if(move[0] == 's' && move[1] == 10){
+			save();
+			continue;
+		}
+		else if(move[0] == 'n' && move[1] == 10){
+			endTime = 0;
+			new();
+			continue;
+		}
+
+		else if(move[0] == 'f' && move[1] == 10){
+			f_load();
+			continue;
+		}
+		else if(move[0] == 'e' && move[1] == 10){
+			fexit();
+			continue;
+		}
+		else if(move[0] == 'r' && move[1] == 10){
+			replay();
+			continue;
+		}
+
+	}
+}
+
+// umap 배열에 undo내용 저장, 박영준
+void scan_undo(void){
+
+	i = 0;
+	j = 0;
+	num_undo = 0;
+
+	while(1){
+
+		umap[num_undo+5][stage][i][j] = umap[num_undo+4][stage][i][j];
+		umap[num_undo+4][stage][i][j] = umap[num_undo+3][stage][i][j];
+		umap[num_undo+3][stage][i][j] = umap[num_undo+2][stage][i][j];
+		umap[num_undo+2][stage][i][j] = umap[num_undo+1][stage][i][j];
+		umap[num_undo+1][stage][i][j] = umap[num_undo][stage][i][j];
+		umap[num_undo][stage][i][j] = p_map[stage][i][j];
+
+		if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] == 'e')
+			break;
+
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+		j++;
+	} 
+}
+
+// undo 시 출력, 박영준
+void print_undo(void){
+
+	i = 0;
+	j = 0;
+	system("clear");
+
+	printf("   Hello %s\n", &name);
+	while(1){
+		if(umap[num_undo][stage][i][j] != 'm' && umap[num_undo][stage][i][j] != 'a' && umap[num_undo][stage][i][j] != 'p' && umap[num_undo][stage][i][j] != 'e' && umap[num_undo][stage][i][j] != 'n' && umap[num_undo][stage][i][j] != 'd')
+			printf("%c", umap[num_undo][stage][i][j]);
+
+		if(umap[num_undo][stage][i][j] == 'm' || umap[num_undo][stage][i][j] == 'e')
+			break;
+
+		if(umap[num_undo][stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+		j++;
+	}
+	printf("(Command)");
+
+	i = 0;
+	j = 0;
+
+	while(1){
+
+		p_map[stage][i][j] = umap[num_undo][stage][i][j];
+
+		if(p_map[stage][i][j] == 'm' || p_map[stage][i][j] == 'e')
+			break;
+
+		if(p_map[stage][i][j] == '\n'){
+			i++;
+			j=0;
+			continue;
+		}
+
+		if(p_map[stage][i][j] == '@'){
+			p_y[stage] = i;
+			p_x[stage] = j;
+		}
+
+		j++;
+	}
+	num_undo++;
+}
