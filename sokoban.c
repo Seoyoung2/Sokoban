@@ -565,3 +565,31 @@ void print_undo(void){
 	}
 	num_undo++;
 }
+
+
+//프로그램 종료, 정경륜
+void fexit(void){
+	system("clear");
+	printf("S E E  Y O U  %s . . . \n", name);
+	printf("\n(Command) e");
+	exit(0);
+}
+
+// 도움말 출력, 정경륜
+void dhelp(void){
+	system("clear");
+	printf("   Hello %s\n\n", name);
+	printf("h(����), j(�Ʒ�), k(��), l(������)\n");
+	printf("u(undo)\n");
+	printf("r(replay)\n");
+	printf("n(new)\n");
+	printf("e(exit)\n");
+	printf("s(save)\n");
+	printf("f(file load)\n");
+	printf("d(display help)\n");
+	printf("t(top)\n\n");
+	printf("(Command) d");
+	getch();
+	system("clear");
+	print_map();
+}
